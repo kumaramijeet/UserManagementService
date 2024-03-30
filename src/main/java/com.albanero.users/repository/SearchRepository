@@ -1,0 +1,11 @@
+package com.albanero.users.repository;
+
+import com.albanero.users.model.User;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public interface SearchRepository {
+    List<User> findByText(String text);
+}
