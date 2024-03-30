@@ -1,0 +1,90 @@
+package com.albanero.users.controller;
+
+
+import com.albanero.users.DTOs.ResponseStatus;
+import com.albanero.users.DTOs.*;
+import com.albanero.users.model.User;
+import com.albanero.users.repository.SearchRepository;
+import com.albanero.users.repository.UserRepository;
+import com.albanero.users.services.UserService;
+import jakarta.servlet.http.HttpServletResponse;
+import org.hibernate.validator.internal.IgnoreForbiddenApisErrors;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
+import java.util.List;
+
+@RestController
+public class UserController {
+
+    @Autowired
+    UserRepository repo;
+
+    @Autowired
+    SearchRepository srepo;
+
+    @Autowired
+    UserService userService;
+
+
+    @RequestMapping(value="/")
+    public void redirect(HttpServletResponse response) throws IOException{
+        response.sendRedirect("/swagger-ui.html");
+    }
+
+
+    @GetMapping("/users")
+    public List<User> getAllUsers(){
+        return repo.findAll();
+    }
+
+
+    @PostMapping("/postUser")
+    public User addUser(@RequestBody User user){
+        return repo.save(user);
+    }
+
+
+    @GetMapping("/users/{text}")
+    public List<User> search(@PathVariable String text ){
+        return srepo.findByText(text);
+    }
+
+
+    @PostMapping("/login")
+    public LoginResponseDto login(@RequestBody LoginRequestDto loginRequestDto) {
+        LoginResponseDto responseDto = new LoginResponseDto();
+        try {
+            User user = userService.login(loginRequestDto.getEmail(), loginRequestDto.getPassword());
+            responseDto.setResponseStatus(ResponseStatus.SUCCESS);
+            responseDto.setUserId(user.getId());
+        } catch (Exception e) {
+            responseDto.setResponseStatus(ResponseStatus.FAILURE);
+        }
+        return responseDto;
+    }
+
+    @PostMapping("/signup")
+    public SignUpResponseDto signUp(@RequestBody SignUpRequestDto requestDto) {
+        SignUpResponseDto responseDto = new SignUpResponseDto();
+        try {
+            User user = userService.signUp(requestDto.getEmail(), requestDto.getPassword());
+            responseDto.setResponseStatus(ResponseStatus.SUCCESS);
+            responseDto.setEmail(user.getEmail());
+        } catch (Exception e) {
+            responseDto.setResponseStatus(ResponseStatus.FAILURE);
+        }
+        return responseDto;
+    }
+
+
+    @GetMapping("/users/{id}")
+    public UserDto getUserById(@PathVariable int id) {
+        User user = userService.getUserById(id);
+        UserDto userDto = new UserDto();
+        userDto.setEmail(user.getEmail());
+        return userDto;
+    }
+
+}
