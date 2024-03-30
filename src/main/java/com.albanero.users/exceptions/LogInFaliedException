@@ -1,0 +1,7 @@
+package com.albanero.users.exceptions;
+
+public class LogInFaliedException extends Exception {
+    public LogInFaliedException(String message) {
+        super(message);
+    }
+}
